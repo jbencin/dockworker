@@ -1724,7 +1724,7 @@ mod tests {
             let container = docker
                 .create_container(Some("dockworker_checkpoint_test"), &create)
                 .unwrap();
-            docker.start_container(&container.id)..unwrap();
+            docker.start_container(&container.id).unwrap();
 
             docker
                 .checkpoint_container(
@@ -1924,7 +1924,9 @@ mod tests {
             .host_config(host_config)
             .env("WAIT_BEFORE_CONTINUING=YES".to_string());
 
-        let container = docker.create_container(None, &create).unwrap();
+        let container = docker
+            .create_container(Some("attach_container_test"), &create)
+            .unwrap();
         docker.start_container(&container.id).unwrap();
         let res = docker
             .attach_container(&container.id, None, true, true, false, true, true)
@@ -1974,7 +1976,9 @@ mod tests {
             .cmd("10".to_owned())
             .host_config(host_config);
 
-        let container = docker.create_container(None, &create).unwrap();
+        let container = docker
+            .create_container(Some("exec_container_test"), &create)
+            .unwrap();
         docker.start_container(&container.id).unwrap();
 
         let mut exec_config = CreateExecOptions::new();
@@ -2026,7 +2030,9 @@ mod tests {
         let mut create = ContainerCreateOptions::new(image_name);
         create.host_config(host_config);
 
-        let container = docker.create_container(None, &create).unwrap();
+        let container = docker
+            .create_container(Some("signal_container_test"), &create)
+            .unwrap();
         docker.start_container(&container.id).unwrap();
         let res = docker
             .attach_container(&container.id, None, true, true, false, true, true)
