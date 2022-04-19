@@ -5,6 +5,7 @@ use serde::de::{DeserializeOwned, Deserializer};
 use serde::{Deserialize, Serialize};
 use serde_json;
 use std::collections::HashMap;
+use std::num::NonZeroU16;
 use std::path::PathBuf;
 use std::time::Duration;
 use url::{self, form_urlencoded};
@@ -199,6 +200,22 @@ impl DeviceMapping {
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
+pub struct HostPort {
+    host_ip: Option<String>,
+    host_port: String
+}
+
+impl HostPort {
+    pub fn new(host_port: String) -> Self {
+        Self {
+            host_port,
+            ..Self::default()
+        }
+    }
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[serde(rename_all = "PascalCase")]
 pub struct ContainerHostConfig {
     binds: Vec<String>,
     tmpfs: HashMap<String, String>,
@@ -226,7 +243,7 @@ pub struct ContainerHostConfig {
     oom_score_adj: u16, // TODO: Maybe this can be smaller?
     pid_mode: String,
     pids_limit: i16,
-    port_bindings: HashMap<String, Vec<HashMap<String, String>>>,
+    port_bindings: HashMap<String, Vec<HostPort>>,
     publish_all_ports: bool,
     privileged: bool,
     readonly_rootfs: bool,
@@ -378,6 +395,10 @@ impl ContainerHostConfig {
     }
     pub fn pids_limit(&mut self, pids_limit: i16) -> &mut Self {
         self.pids_limit = pids_limit;
+        self
+    }
+    pub fn port_binding(&mut self, port: String, host_ports: Vec<HostPort>) -> &mut Self {
+        self.port_bindings.insert(port, host_ports);
         self
     }
     pub fn publish_all_ports(&mut self, publish_all_ports: bool) -> &mut Self {
