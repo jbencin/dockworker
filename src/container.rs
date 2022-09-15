@@ -304,6 +304,15 @@ pub enum ContainerStatus {
 }
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord, Serialize)]
+#[serde(rename_all = "lowercase")]
+pub enum ContainerHealth {
+    Starting,
+    Healthy,
+    Unhealthy,
+    None
+}
+
+#[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord, Serialize, Default)]
 pub struct ContainerFilters {
     #[serde(skip_serializing_if = "Vec::is_empty")]
     id: Vec<String>,
@@ -311,16 +320,14 @@ pub struct ContainerFilters {
     name: Vec<String>,
     #[serde(skip_serializing_if = "Vec::is_empty")]
     status: Vec<ContainerStatus>,
-}
-
-impl Default for ContainerFilters {
-    fn default() -> Self {
-        Self {
-            id: vec![],
-            name: vec![],
-            status: vec![],
-        }
-    }
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    label: Vec<String>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    volume: Vec<String>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    network: Vec<String>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    health: Vec<ContainerHealth>,
 }
 
 impl ContainerFilters {
@@ -340,6 +347,29 @@ impl ContainerFilters {
 
     pub fn status(&mut self, status: ContainerStatus) -> &mut Self {
         self.status.push(status);
+        self
+    }
+
+    /// Can be `key` or `key=value` format
+    pub fn label(&mut self, label: &str) -> &mut Self {
+        self.label.push(label.to_owned());
+        self
+    }
+
+    /// Can be `<volume name>` or `<mount point destination>`
+    pub fn volume(&mut self, volume: &str) -> &mut Self {
+        self.volume.push(volume.to_owned());
+        self
+    }
+
+    /// Can be `<network id>` or `<network name>`
+    pub fn network(&mut self, network: &str) -> &mut Self {
+        self.network.push(network.to_owned());
+        self
+    }
+
+    pub fn health(&mut self, health: ContainerHealth) -> &mut Self {
+        self.health.push(health);
         self
     }
 }
